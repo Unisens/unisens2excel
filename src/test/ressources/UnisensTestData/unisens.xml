@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unisens xmlns="http://www.unisens.org/unisens2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" comment="" duration="3887.0" measurementId="TestData" timestampStart="2011-05-19T13:33:19.000" version="2.0" xsi:schemaLocation="http://www.unisens.org/unisens2.0 http://www.unisens.org/unisens2.0/unisens.xsd">
+   
+   <customAttributes>
+      
+      <customAttribute key="revision" value="13227"/>
+      
+      <customAttribute key="sensorVersion" value="6310"/>
+      
+      <customAttribute key="sectorCount" value="8315"/>
+      
+      <customAttribute key="sensorType" value="ekgMove"/>
+      
+      <customAttribute key="sensorLocation" value="2"/>
+      
+      <customAttribute key="age" value="40"/>
+      
+      <customAttribute key="sensorSerialNumber" value="00326"/>
+      
+      <customAttribute key="personId" value=""/>
+      
+      <customAttribute key="gender" value="M"/>
+   
+   </customAttributes>
+   
+    
+   <valuesEntry comment="Mean heartrate in output interval [1/min]" contentClass="Hr" dataType="double" id="Hr.csv" lsbValue="1" sampleRate="0.016666666666666666" unit="1/min">
+      
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      
+      <channel name="Hr"/>
+   
+   </valuesEntry>
+   
+   <signalEntry comment="Activity Class (0=unknown, 1=lying, 2=sitting/standing, 4=slope up, 5=jogging, 6=slope down, 7=walking, 8=sitting/lying, 9=standing, &#x9;10=sitting/lying/standing,&#x9;99=not worn" dataType="double" id="ActivityClass.csv" lsbValue="1" sampleRate="0.016666666666666666" unit="">
+      
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      
+      <channel name="ActivityClass"/>
+   
+   </signalEntry>
+   
+   <valuesEntry comment="HRV parameter RMSSD (root mean square of successive differences of NN intervals)" contentClass="HrvRmssd" dataType="double" id="HrvRmssd.csv" lsbValue="1" sampleRate="0.016666666666666666" unit="ms">
+      
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      
+      <channel name="HrvRmssd"/>
+   
+   </valuesEntry>
+
+</unisens>

@@ -16,4 +16,4 @@ include 'api'
 include 'services:webservice'
 */
 
-rootProject.name = 'Unisens2Excel'
+rootProject.name = 'org.unisens.unisens2excel'
