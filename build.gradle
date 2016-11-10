@@ -14,11 +14,16 @@ apply plugin: 'eclipse'
 targetCompatibility = "1.7"
 sourceCompatibility = "1.7"
 
+group = 'com.github.unisens'
+
+version = '1.0.0'
+
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+	maven { url "https://jitpack.io" }
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -26,12 +31,20 @@ dependencies {
     compile 'org.apache.poi:poi:3.9'
     compile 'org.apache.poi:poi-ooxml:3.9'
     compile 'org.apache.poi:poi-ooxml-schemas:3.9'
-    compile files('libs/org.unisens.jar')
-    compile files('libs/org.unisens.ri.jar')
+    compile 'com.github.unisens:unisens4java:2.2.1'
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the
     // testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
     testCompile 'junit:junit:4.12'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier 'sources'
+	from sourceSets.main.allSource
+}
+ 
+artifacts {
+	archives sourcesJar
 }
