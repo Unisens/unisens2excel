@@ -16,7 +16,7 @@ public class LibraryTest {
     
     @Test public void testXlsRendering() throws UnisensParseException, IOException {
     	
-   		Unisens2Excel u2xls= new Unisens2Excel("./src/test/ressources/UnisensTestData", 1.0/60, "./Results.xlsx");
+   		Unisens2Excel u2xls= new Unisens2Excel("./src/test/resources/UnisensTestData", 1.0/60, "./Results.xlsx");
   		u2xls.renderXLS();
     }
     
