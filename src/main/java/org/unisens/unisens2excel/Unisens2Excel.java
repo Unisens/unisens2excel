@@ -131,6 +131,7 @@ public class Unisens2Excel
             int rowCount = 0;
             Row row = resultSheet.createRow(0);
 
+            //create header - date and time
             for (int i = 0; i < dateTimeHeaders.length; i++)
             {
                 Cell cell = row.createCell(i);
@@ -148,6 +149,7 @@ public class Unisens2Excel
                 rowCount++;
             }
 
+            //create header - entries
             for (int i = 0; i < outputEntries.size(); i++)
             {
                 MeasurementEntry measurementEntry = (MeasurementEntry) outputEntries.get(i);
@@ -175,10 +177,12 @@ public class Unisens2Excel
 
             int rowNumber = 0;
             int maxColNumber = 0;
-            boolean go = true;
-            while (go)
+
+            while (true)
             {
                 row = resultSheet.createRow(rowNumber + 1);
+
+                int nEntriesWithData = 0;
                 int cellnum = 0;
                 Cell cell;
 
@@ -223,15 +227,10 @@ public class Unisens2Excel
                         SignalEntry signalEntry = (SignalEntry) entry;
                         double[][] dataArray = (double[][]) signalEntry.readScaled(1);
 
-                        if (dataArray.length < 1)
+                        if (dataArray.length > 0)
                         {
-                            resultSheet.removeRow(row);
-                            go = false;
-                            break;
-                        }
-                        else
-                        {
-                            double[] data = dataArray[0];
+                        	nEntriesWithData++;
+                        	double[] data = dataArray[0];
                             // write data in cells
                             for (int j = 0; j < signalEntry.getChannelCount(); j++)
                             {
@@ -239,6 +238,10 @@ public class Unisens2Excel
                                 cellnum++;
                                 cell.setCellValue(data[j]);
                             }
+                        }
+                        else
+                        {
+                        	cellnum = cellnum + signalEntry.getChannelCount();
                         }
                     }
                     else if (entry instanceof ValuesEntry)
@@ -258,15 +261,10 @@ public class Unisens2Excel
                                 value = null;
                             }
                         }
-                        if (value == null)
+                        if (value != null)
                         {
-                            resultSheet.removeRow(row);
-                            go = false;
-                            break;
-                        }
-                        else
-                        {
-                            // write data in cells
+                        	nEntriesWithData++;
+                            // write data into cells
                             if (value.getSampleStamp() == rowNumber)
                             {
                                 for (int j = 0; j < valuesEntry.getChannelCount(); j++)
@@ -282,14 +280,26 @@ public class Unisens2Excel
                                 cellnum += valuesEntry.getChannelCount();
                             }
                         }
-
+                        else
+                        {
+                            // insert empty cells
+                            cellnum += valuesEntry.getChannelCount();
+                        }
                     }
                 }
                 
                 if(cellnum > maxColNumber) {
 					maxColNumber = cellnum;
 				}
+                
+                if (nEntriesWithData==0)
+                {
+                	resultSheet.removeRow(row);
+                	break;
+                }
+
                 rowNumber++;
+                
             }
             
             XSSFSheet sheet2 = wb.getXSSFWorkbook().getSheet(resultSheet.getSheetName());
