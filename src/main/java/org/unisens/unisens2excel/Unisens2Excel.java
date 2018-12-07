@@ -239,6 +239,10 @@ public class Unisens2Excel
                                 cell.setCellValue(data[j]);
                             }
                         }
+                        else
+                        {
+                        	cellnum = cellnum + signalEntry.getChannelCount();
+                        }
                     }
                     else if (entry instanceof ValuesEntry)
                     {
