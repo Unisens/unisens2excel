@@ -12,12 +12,11 @@ Add the JitPack repository and the dependency to your build file:
       maven { url "https://jitpack.io" }
   }
   dependencies {
-      compile 'com.github.unisens:unisens2excel:1.0.0'
+      compile 'com.github.unisens:unisens2excel:1.0.2'
   }
   ```
 
 Unisens is a **universal data format for multi sensor data**. 
 For more information please check the [Unisens website](http://www.unisens.org).
 
-If Unisens meets your requirements, feel free to try it. unisens2excel is licenced under
-the <acronym title="GNU Lesser General Public Licence">LGPL</acronym> and it may be downloaded [in the download section](http://www.unisens.org/downloads.php).
+unisens2excel is licenced under the <acronym title="GNU Lesser General Public Licence">LGPL</acronym>.
