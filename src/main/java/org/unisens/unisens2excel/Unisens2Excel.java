@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -59,6 +63,11 @@ public class Unisens2Excel
     {
         this(unisensPath, baseSamplerate, new File(excelPathAndFile));
 
+    }
+    
+    public Unisens2Excel(String unisensPath, double baseSamplerate) throws UnisensParseException, FileNotFoundException
+    {
+        this(unisensPath, baseSamplerate, new File(unisensPath+"\\Results.xlsx"));
     }
 
     public Unisens2Excel(String unisensPath, double baseSamplerate, File excelPathAndFile) throws UnisensParseException, FileNotFoundException
@@ -305,6 +314,12 @@ public class Unisens2Excel
             XSSFSheet sheet2 = wb.getXSSFWorkbook().getSheet(resultSheet.getSheetName());
 			updateDimensionRef(sheet2, maxColNumber, rowNumber+1);
 
+			//delete Results.xsls if it already exists
+			if (excelOutputFile.exists())
+			{
+				excelOutputFile.delete();
+			}
+				
             FileOutputStream excelOutputStream = new FileOutputStream(excelOutputFile);
             wb.write(excelOutputStream);
             excelOutputStream.close();
@@ -329,4 +344,55 @@ public class Unisens2Excel
 						+ CellReference.convertNumToColString(colNumber - 1)
 						+ rowNumber);
 	}
+	
+	public static void main(String[] args) throws UnisensParseException, IOException 
+	{
+		
+		batchProcess(args[0], 1.0/Double.parseDouble(args[1]));
+	}
+	
+	public static void batchProcess(String path, double sampleRate) throws UnisensParseException, IOException 
+	{
+		Path basePath = Paths.get(path);
+		ArrayList<Path> allUnisensPaths = getAllUnisensPaths(basePath, new ArrayList<Path>());
+		for (Path unisensPath : allUnisensPaths)
+		{
+			System.out.print(unisensPath.toAbsolutePath().toString()+"...");
+			Unisens2Excel unisens2Excel = new Unisens2Excel(unisensPath.toAbsolutePath().toString(), sampleRate);
+			unisens2Excel.renderXLS();
+			System.out.println("...done.");
+		}
+		
+	}
+	
+	private static ArrayList<Path> getAllUnisensPaths(Path path, ArrayList<Path> list)
+	{
+	    try 
+	    {
+	    	DirectoryStream<Path> stream = Files.newDirectoryStream(path);
+	        for (Path entry : stream) {
+	            if (Files.isDirectory(entry)) {
+	            	getAllUnisensPaths(entry, list);
+	            }
+	            else
+	            {
+	            	if (entry.toFile().getName().toLowerCase().equals("unisens.xml"))
+	            	{
+	            		list.add(entry.getParent());
+	            	}
+	            }
+	        }
+	        stream.close();
+	    }
+	    catch (IOException e)
+	    {
+	    	e.printStackTrace();
+	    }
+
+		return list; 
+		
+	}
+
+	
+	
 }

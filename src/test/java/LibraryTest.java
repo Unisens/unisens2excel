@@ -26,4 +26,8 @@ public class LibraryTest {
   		u2xls.renderXLS();
     }
     
+    @Test public void testBatch() throws UnisensParseException, IOException {
+    	Unisens2Excel.batchProcess("./src/test/resources/UnisensTestData", 1.0/60);
+    }
+   
 }
