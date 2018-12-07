@@ -8,3 +8,5 @@ bin
 .project
 gui.conf
 log.txt*
+
+Results*.xlsx
