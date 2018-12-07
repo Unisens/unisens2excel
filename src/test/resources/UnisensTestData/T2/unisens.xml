@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unisens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" duration="1020.0" measurementId="2018-11-27 11.21.01" timestampStart="2018-11-27T11:21:01.343" version="2.0" xsi:schemaLocation="http://www.unisens.org/unisens2.0 http://www.unisens.org/unisens2.0/unisens.xsd">
+   <customAttributes>
+      <customAttribute key="sensorVersion" value="1.12.0"/>
+      <customAttribute key="sectorCount" value="1509"/>
+      <customAttribute key="sensorType" value="Move4"/>
+      <customAttribute key="sensorLocation" value="right_side_hip"/>
+      <customAttribute key="sensorSerialNumber" value="02974"/>
+      <customAttribute key="gender" value="M"/>
+   </customAttributes>
+   <signalEntry comment="MovementAcceleration: Raw acceleration, bandpass filtered, vector magnitude" dataType="double" id="MovementAcceleration.csv" lsbValue="1" sampleRate="0.1" unit="g">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="MovementAcceleration"/>
+   </signalEntry>
+   <signalEntry comment="Count of steps per output interval" dataType="double" id="StepCount.csv" lsbValue="1" sampleRate="0.1" unit="steps">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="StepCount"/>
+   </signalEntry>
+   <signalEntry comment="Mean amplitude deviation (MAD) of acceleration" dataType="double" id="MeanAmplitudeDeviation.csv" lsbValue="1" sampleRate="0.1" unit="g">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="MeanAmplitudeDeviation"/>
+   </signalEntry>
+   <signalEntry comment="Inclination of sensor axis down against the vertical (0 to 180 deg)" dataType="double" id="InclinationDown.csv" lsbValue="1" sampleRate="0.1" unit="deg">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="InclinationDown"/>
+   </signalEntry>
+   <signalEntry comment="Inclination of sensor axis right against the vertical (0 to 180 deg)" dataType="double" id="InclinationRight.csv" lsbValue="1" sampleRate="0.1" unit="deg">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="InclinationRight"/>
+   </signalEntry>
+   <signalEntry comment="Inclination of sensor axis forward against the vertical (0 to 180 deg)" dataType="double" id="InclinationForward.csv" lsbValue="1" sampleRate="0.1" unit="deg">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="InclinationForward"/>
+   </signalEntry>
+   <signalEntry comment="Mean temperature in output interval" dataType="double" id="TempMean.csv" lsbValue="1" sampleRate="0.1" unit="">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="TempMean"/>
+   </signalEntry>
+   <signalEntry comment="Mean skin conductance level in output interval" dataType="double" id="EdaSclMean.csv" lsbValue="1" sampleRate="0.1" unit="uS">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="EdaSclMean"/>
+   </signalEntry>
+   <signalEntry comment="Altitude from barometer" dataType="double" id="Altitude.csv" lsbValue="1" sampleRate="0.1" unit="m">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="Altitude"/>
+   </signalEntry>
+   <signalEntry comment="Vertical speed, calculated from barometer" dataType="double" id="VerticalSpeed.csv" lsbValue="1" sampleRate="0.1" unit="m/s">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="VerticalSpeed"/>
+   </signalEntry>
+   <signalEntry comment="Body position (0=unknown, 1=lying supine, 2=lying left, 3=lying prone, 4=lying right, 5=upright, 6=sitting/lying, 7=standing , 99=not worn)" dataType="double" id="BodyPosition.csv" lsbValue="1" sampleRate="0.1" unit="">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="BodyPosition"/>
+   </signalEntry>
+   <signalEntry comment="Number of SCRs in output interval" dataType="double" id="EdaScrCount.csv" lsbValue="1" sampleRate="0.1" unit="">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="EdaScrCount"/>
+   </signalEntry>
+   <signalEntry comment="Activity Class (0=unknown, 1=lying, 2=sitting/standing, 4=slope up, 5=jogging, 6=slope down, 7=walking, 8=sitting/lying, 9=standing,&#x9;10=sitting/lying/standing, 99=not worn)" dataType="double" id="ActivityClass.csv" lsbValue="1" sampleRate="0.1" unit="">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="ActivityClass"/>
+   </signalEntry>
+   <signalEntry comment="Activity energy expenditure (AEE) in kcal/d" dataType="double" id="ActivityEnergyExpenditure.csv" lsbValue="1" sampleRate="0.1" unit="kcal/d">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="ActivityEnergyExpenditure"/>
+   </signalEntry>
+   <signalEntry comment="MET value directly calculated from regression models" dataType="double" id="MET.csv" lsbValue="1" sampleRate="0.1" unit="">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="MET"/>
+   </signalEntry>
+   <signalEntry comment="Total energy expenditure (TEE = BMR + AEE)" dataType="double" id="TotalEnergyExpenditure.csv" lsbValue="1" sampleRate="0.1" unit="kcal/d">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="TotalEnergyExpenditure"/>
+   </signalEntry>
+   <signalEntry comment="Non wear detection 0=worn, 1=not worn" dataType="double" id="NonWearTime.csv" lsbValue="1" sampleRate="0.1" unit="">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="NonWearTime"/>
+   </signalEntry>
+   <signalEntry comment="Sleep/Wake detection 0=wake, 1=sleep, 2=not worn" dataType="double" id="NonWearSleepWake.csv" lsbValue="1" sampleRate="0.1" unit="">
+      <csvFileFormat decimalSeparator="," separator=";"/>
+      <channel name="NonWearSleepWake"/>
+   </signalEntry>
+</unisens>
