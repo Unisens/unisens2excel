@@ -207,7 +207,7 @@ public class Unisens2Excel
                 cell.setCellStyle(hhmmss);
                 cellnum++;
 
-                Date tAbsDate = new Date(this.unisens.getTimestampStart().getTime() + tRelSeconds * 1000);
+                Date tAbsDate = new Date(this.unisens.getTimestampStart().getTime() + (long)tRelSeconds * 1000L);
                 cell = row.createCell(cellnum);
                 cell.setCellValue(tAbsDate);
                 cell.setCellStyle(yyyymmdd);
