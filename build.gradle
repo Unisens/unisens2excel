@@ -32,6 +32,7 @@ dependencies {
     compile 'org.apache.poi:poi-ooxml:3.9'
     compile 'org.apache.poi:poi-ooxml-schemas:3.9'
     compile 'com.github.unisens:unisens4java:2.2.1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.10.0'
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the

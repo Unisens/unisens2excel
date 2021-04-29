@@ -26,6 +26,20 @@ public class LibraryTest {
   		u2xls.renderXLS();
     }
     
+    @Test public void testXlsRendering3A() throws UnisensParseException, IOException {
+    	   
+   		Unisens2Excel u2xls= new Unisens2Excel("./src/test/resources/UnisensTestData/T3", 1.0/10, "./Results3A.xlsx");
+  		u2xls.renderXLS();
+    }
+    
+    @Test public void testXlsRendering3B() throws UnisensParseException, IOException {
+ 	   
+   		Unisens2Excel u2xls= new Unisens2Excel("./src/test/resources/UnisensTestData/T3", 1.0/10, "./Results3B.xlsx");
+   		u2xls.setMarkerFormat(MarkerFormat.SIMPLE);
+  		u2xls.renderXLS();
+    }
+    
+    
     @Test public void testBatch() throws UnisensParseException, IOException {
     	Unisens2Excel.batchProcess("./src/test/resources/UnisensTestData", 1.0/60);
     }
