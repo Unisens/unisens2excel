@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<unisens comment="Original timestampStart before crop/delete: 2018-07-24T17:35:00.140" duration="635.0" measurementId="2018-07-24 17.35.00 oj" timestampStart="2018-07-24T18:11:18.023" version="2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.unisens.org/unisens2.0 http://www.unisens.org/unisens2.0/unisens.xsd" xmlns="http://www.unisens.org/unisens2.0">
+<customAttributes>
+<customAttribute key="sensorTimeDrift" value="-2.87534504849144E-5"/>
+<customAttribute key="sensorVersion" value="1.11.69-SN"/>
+<customAttribute key="sectorCount" value="42096"/>
+<customAttribute key="sensorType" value="EcgMove4"/>
+<customAttribute key="sensorLocation" value="right_side_hip"/>
+<customAttribute key="sensorSerialNumber" value="02725"/>
+<customAttribute key="gender" value="M"/>
+</customAttributes>
+<eventEntry commentLength="10" id="marker.csv" sampleRate="1024" typeLength="1">
+<csvFileFormat decimalSeparator="." separator=";"/>
+</eventEntry>
+<signalEntry comment="MovementAcceleration: Raw acceleration, bandpass filtered, vector magnitude" dataType="double" id="MovementAcceleration.csv" lsbValue="1" sampleRate="0.1" unit="g">
+<csvFileFormat decimalSeparator="," separator=";"/>
+<channel name="MovementAcceleration"/>
+</signalEntry>
+<valuesEntry comment="Mean heartrate in output interval" dataType="double" id="Hr.csv" lsbValue="1" sampleRate="0.1" unit="1/min">
+<csvFileFormat decimalSeparator="," separator=";"/>
+<channel name="Hr"/>
+</valuesEntry>
+</unisens>

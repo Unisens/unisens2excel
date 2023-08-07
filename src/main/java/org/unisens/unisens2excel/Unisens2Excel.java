@@ -1,6 +1,7 @@
 package org.unisens.unisens2excel;
 
 import java.io.File;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -28,6 +30,8 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.unisens.Entry;
+import org.unisens.Event;
+import org.unisens.EventEntry;
 import org.unisens.MeasurementEntry;
 import org.unisens.SignalEntry;
 import org.unisens.TimedEntry;
@@ -38,6 +42,8 @@ import org.unisens.UnisensParseException;
 import org.unisens.Value;
 import org.unisens.ValuesEntry;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class Unisens2Excel
 {
 
@@ -45,20 +51,32 @@ public class Unisens2Excel
 
     double baseSampleRate;
 
-    int nColumns = 0;
-
+    File excelOutputFile;
+    
     List<Entry> outputEntries;
 
-    File excelOutputFile;
+    int nColumns = 0;
 
-    Map<ValuesEntry, Value> currentValues;
+    
+    Map<ValuesEntry, Value> queuedValues;
+    Event queuedMarker;
+    
+    final static String OUTPUT_FILE_NAME = "Results.xlsx";
+    
+    final static String MARKER_ENTRY_ID = "marker.csv";
 
-    final static String[] dateTimeHeaders = { "Time rel", "Day rel", "Time rel", "Date abs", "Time abs"};
+    final static String[] DATE_TIME_HEADERS = { "Time rel", "Day rel", "Time rel", "Date abs", "Time abs"};
+    final static String[] DATE_TIME_UNITS = { "[s]", "[d]", "[hh:mm:ss]", "[yyyy-mm-dd]", "[hh:mm:ss]"};
+    final static String[] DATE_TIME_DESCRIPTIONS = { "Relative time from start of measurements in seconds", "Number of days from start of measurement", "Relative time from start if measurement", "Absolute date", "Absolute time"};
 
-    final static String[] dateTimeUnits = { "[s]", "[d]", "[hh:mm:ss]", "[yyyy-mm-dd]", "[hh:mm:ss]"};
-
-    final static String[] dateTimeDescriptions = { "Relative time from start of measurements in seconds", "Number of days from start of measurement", "Relative time from start if measurement", "Absolute date", "Absolute time"};
-
+    MarkerFormat markerFormat = MarkerFormat.SIMPLE;
+    
+    CellStyle headline;
+    Sheet resultSheet;
+    Row resultSheetRow;
+    Sheet parameterSheet;
+    
+    
     public Unisens2Excel(String unisensPath, double baseSamplerate, String excelPathAndFile) throws UnisensParseException, FileNotFoundException
     {
         this(unisensPath, baseSamplerate, new File(excelPathAndFile));
@@ -67,7 +85,7 @@ public class Unisens2Excel
     
     public Unisens2Excel(String unisensPath, double baseSamplerate) throws UnisensParseException, FileNotFoundException
     {
-        this(unisensPath, baseSamplerate, new File(unisensPath+"\\Results.xlsx"));
+        this(unisensPath, baseSamplerate, new File(unisensPath+"\\"+OUTPUT_FILE_NAME));
     }
 
     public Unisens2Excel(String unisensPath, double baseSamplerate, File excelPathAndFile) throws UnisensParseException, FileNotFoundException
@@ -77,11 +95,14 @@ public class Unisens2Excel
         this.excelOutputFile = excelPathAndFile;
         this.baseSampleRate = baseSamplerate;
         this.outputEntries = new ArrayList<Entry>();
-        this.currentValues = new HashMap<ValuesEntry, Value>();
+        this.queuedValues = new HashMap<ValuesEntry, Value>();
+
 
         List<Entry> allEntries = unisens.getEntries();
         Iterator<Entry> iterator = allEntries.iterator();
         Entry entry;
+        Entry markerEntry = null;
+        
         while (iterator.hasNext())
         {
             entry = (Entry) iterator.next();
@@ -93,12 +114,23 @@ public class Unisens2Excel
                     this.nColumns += ((MeasurementEntry) entry).getChannelCount();
                 }
             }
+            if ((entry instanceof org.unisens.EventEntry) && (entry.getId().equals(MARKER_ENTRY_ID)) && (((TimedEntry)entry).getSampleRate() > baseSamplerate) )
+            {
+            	markerEntry = entry;
+            }
         }
 
         Collections.sort(outputEntries, new UnisensEntryComparer());
-
+        if (markerEntry != null)
+        {
+        	this.outputEntries.add(0, markerEntry);
+        }
     }
 
+    public void setMarkerFormat(MarkerFormat markerFormat) {
+    	this.markerFormat = markerFormat;
+    }
+    
     public void renderXLS() throws IOException
     {
 
@@ -110,7 +142,7 @@ public class Unisens2Excel
             // keep 100 rows in memory, exceeding rows will be flushed to disk
             SXSSFWorkbook wb = new SXSSFWorkbook(100);
 
-            CellStyle headline = wb.createCellStyle();
+            headline = wb.createCellStyle();
             Font f = wb.createFont();
             f.setBoldweight(Font.BOLDWEIGHT_BOLD);
             headline.setFont(f);
@@ -128,68 +160,84 @@ public class Unisens2Excel
             CellStyle yyyymmdd = wb.createCellStyle();
             yyyymmdd.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-mm-dd"));
 
+            List<Marker> markerList = new ArrayList<Marker>();
+            ObjectMapper objectMapper= new ObjectMapper();
+            objectMapper.setTimeZone(TimeZone.getDefault());
+            
             // create sheet for results
-            Sheet resultSheet = wb.createSheet("movisens DataAnalyzer Results");
+            resultSheet = wb.createSheet("movisens DataAnalyzer Results");
 
             // create sheet for column descriptions
-            Sheet parameterSheet = wb.createSheet("movisens DataAnalyzer Parameter Decriptions");
+            parameterSheet = wb.createSheet("movisens DataAnalyzer Parameter Decriptions");
             parameterSheet.setColumnWidth(0, 7000);
-            parameterSheet.setColumnWidth(1, 3000);
+            parameterSheet.setColumnWidth(1, 7000);
             parameterSheet.setColumnWidth(2, 30000);
 
-            int rowCount = 0;
-            Row row = resultSheet.createRow(0);
+            int columnCount = 0;
+            int parameterRowCount = 0;
+            Row resultSheetRow = resultSheet.createRow(0);
 
-            //create header - date and time
-            for (int i = 0; i < dateTimeHeaders.length; i++)
+            //create header for date and time
+            for (int i = 0; i < DATE_TIME_HEADERS.length; i++)
             {
-                Cell cell = row.createCell(i);
-                cell.setCellValue(dateTimeHeaders[i] + " " + dateTimeUnits[i]);
-                cell.setCellStyle(headline);
-                resultSheet.setColumnWidth(i, 7000);
+            	addColumnHeaderRow(resultSheetRow, columnCount, DATE_TIME_HEADERS[i] + " " + DATE_TIME_UNITS[i]);
+                columnCount++;
 
-                Row pRow = parameterSheet.createRow(i);
-                cell = pRow.createCell(0);
-                cell.setCellValue(dateTimeHeaders[i]);
-                cell = pRow.createCell(1);
-                cell.setCellValue(dateTimeUnits[i]);
-                cell = pRow.createCell(2);
-                cell.setCellValue(dateTimeDescriptions[i]);
-                rowCount++;
+                addParameter(parameterRowCount, DATE_TIME_HEADERS[i], DATE_TIME_UNITS[i], DATE_TIME_DESCRIPTIONS[i]);
+                parameterRowCount++;
             }
-
-            //create header - entries
+            
+            //create header for entries
             for (int i = 0; i < outputEntries.size(); i++)
             {
-                MeasurementEntry measurementEntry = (MeasurementEntry) outputEntries.get(i);
+            	Entry entry = outputEntries.get(i);
+            	
+            	//for now we only have marker entry
+            	if (entry instanceof EventEntry)
+            	{
+            		EventEntry eventEntry = (EventEntry) entry;
+            		
+            		if (markerFormat == MarkerFormat.JSON)
+            		{
+            			addColumnHeaderRow(resultSheetRow, columnCount, "Marker in JSON format");
+            			addParameter(parameterRowCount, "Marker", "in JSON format", "Markers from marker.csv set by sensor and in UnisensViewer");
+            		}
+            		else
+            		{
+            			addColumnHeaderRow(resultSheetRow, columnCount, "Marker (Time; Type; Comment)");
+            			addParameter(parameterRowCount, "Marker", "(Time; Type; Comment)", "Markers from marker.csv set by sensor and in UnisensViewer");
+            		}
+            		resultSheet.setColumnWidth(columnCount, 10000);
 
-                for (int j = 0; j < measurementEntry.getChannelCount(); j++)
-                {
-                    Cell cell = row.createCell(i + j + dateTimeHeaders.length);
-                    cell.setCellValue(measurementEntry.getChannelNames()[j] + " [" + measurementEntry.getUnit() + "]");
-                    cell.setCellStyle(headline);
-                    resultSheet.setColumnWidth(i + j + dateTimeHeaders.length, 7000);
+            		columnCount++;
+                    parameterRowCount++;
+            		
+            	}
+            	
+            	if (entry instanceof MeasurementEntry)
+            	{	
+            		MeasurementEntry measurementEntry = (MeasurementEntry) entry;
 
-                    Row pRow = parameterSheet.createRow(i + j + dateTimeHeaders.length);
-                    cell = pRow.createCell(0);
-                    cell.setCellValue(measurementEntry.getChannelNames()[j]);
-                    cell = pRow.createCell(1);
-                    cell.setCellValue("[" + measurementEntry.getUnit() + "]");
-                    cell = pRow.createCell(2);
-                    cell.setCellValue(measurementEntry.getComment());
-                    rowCount++;
-                }
+	                for (int j = 0; j < measurementEntry.getChannelCount(); j++)
+	                {
+	                	addColumnHeaderRow(resultSheetRow, columnCount, measurementEntry.getChannelNames()[j] + " [" + measurementEntry.getUnit() + "]");
+	                    columnCount++;
+	
+	            		addParameter(parameterRowCount, measurementEntry.getChannelNames()[j], "[" + measurementEntry.getUnit() + "]", measurementEntry.getComment());
+	                    parameterRowCount++;
+	                }
+            	}
             }
             
             XSSFSheet sheet = wb.getXSSFWorkbook().getSheet(parameterSheet.getSheetName());
-			updateDimensionRef(sheet, 3, rowCount);
+			updateDimensionRef(sheet, 3, parameterRowCount);
 
             int rowNumber = 0;
             int maxColNumber = 0;
 
             while (true)
             {
-                row = resultSheet.createRow(rowNumber + 1);
+                resultSheetRow = resultSheet.createRow(rowNumber + 1);
 
                 int nEntriesWithData = 0;
                 int cellnum = 0;
@@ -197,12 +245,12 @@ public class Unisens2Excel
 
                 // add timing cells
                 int tRelSeconds = (int) (rowNumber / this.baseSampleRate);
-                cell = row.createCell(cellnum);
+                cell = resultSheetRow.createCell(cellnum);
                 cell.setCellValue(tRelSeconds);
                 cellnum++;
 
                 int tRelDay = (int) Math.floor(tRelSeconds / 24.0 / 60 / 60);
-                cell = row.createCell(cellnum);
+                cell = resultSheetRow.createCell(cellnum);
                 cell.setCellValue(tRelDay);
                 cellnum++;
 
@@ -211,18 +259,18 @@ public class Unisens2Excel
                 calender.set(Calendar.HOUR, 0);
                 calender.set(Calendar.SECOND, 0);
                 calender.add(Calendar.SECOND, tRelSeconds);
-                cell = row.createCell(cellnum);
+                cell = resultSheetRow.createCell(cellnum);
                 cell.setCellValue(calender.getTime());
                 cell.setCellStyle(hhmmss);
                 cellnum++;
 
                 Date tAbsDate = new Date(this.unisens.getTimestampStart().getTime() + (long)tRelSeconds * 1000L);
-                cell = row.createCell(cellnum);
+                cell = resultSheetRow.createCell(cellnum);
                 cell.setCellValue(tAbsDate);
                 cell.setCellStyle(yyyymmdd);
                 cellnum++;
 
-                cell = row.createCell(cellnum);
+                cell = resultSheetRow.createCell(cellnum);
                 cell.setCellValue(tAbsDate);
                 cell.setCellStyle(hhmmss);
                 cellnum++;
@@ -231,6 +279,74 @@ public class Unisens2Excel
                 for (int i = 0; i < outputEntries.size(); i++)
                 {
                     Entry entry = outputEntries.get(i);
+
+                    
+                    if (entry instanceof EventEntry)
+                    {
+                    	EventEntry eventEntry = (EventEntry) entry;
+                 	
+                    	double tStartSec = (double)rowNumber / this.baseSampleRate;
+                    	double tEndSec = tStartSec + 1.0 / this.baseSampleRate;
+                    	
+                    	Event marker = queuedMarker;
+                    	
+                    	while (true)
+                    	{
+                    		if (queuedMarker == null)
+                    		{
+                                List<Event> events = eventEntry.read(1);
+                                if (events.size() > 0)
+                                {
+                                    marker = events.get(0);
+                                } 
+                                else
+                                {
+                                	marker = null;
+                                }
+                    		} 
+                    		else
+                    		{
+                    			marker = queuedMarker;
+                    		}
+                    		
+                    		if (marker != null)
+                    		{	
+                    			double tSec = marker.getSampleStamp() / eventEntry.getSampleRate();
+                    			if ( (tSec >= tStartSec) && (tSec < tEndSec) )
+                    			{
+                           			markerList.add(new Marker(this.unisens.getTimestampStart(), marker, eventEntry.getSampleRate()));
+                    				queuedMarker = null;
+                    			}
+                    			else
+                    			{
+                    				queuedMarker = marker;
+                    				break;
+                    			}
+                    		}
+                    		else
+                    		{
+                    			queuedMarker = null;
+                    			break;
+                    		}
+                    	}
+                    	
+                		if (markerList.size() > 0)
+                		{
+                			cell = resultSheetRow.createCell(cellnum);
+                    		if (markerFormat == MarkerFormat.JSON)
+                    		{
+                    			cell.setCellValue(objectMapper.writeValueAsString(markerList));
+                    		}
+                    		else
+                    		{
+                    			cell.setCellValue(markerList2String(markerList));
+                    		}
+                    		markerList.clear();
+                		}
+                		cellnum++;
+                	
+                    }
+                    
                     if (entry instanceof SignalEntry)
                     {
                         SignalEntry signalEntry = (SignalEntry) entry;
@@ -243,7 +359,7 @@ public class Unisens2Excel
                             // write data in cells
                             for (int j = 0; j < signalEntry.getChannelCount(); j++)
                             {
-                                cell = row.createCell(cellnum);
+                                cell = resultSheetRow.createCell(cellnum);
                                 cellnum++;
                                 cell.setCellValue(data[j]);
                             }
@@ -256,14 +372,14 @@ public class Unisens2Excel
                     else if (entry instanceof ValuesEntry)
                     {
                         ValuesEntry valuesEntry = (ValuesEntry) entry;
-                        Value value = this.currentValues.get(valuesEntry);
+                        Value value = this.queuedValues.get(valuesEntry);
                         if ((value == null) || (value.getSampleStamp() < rowNumber))
                         {
                             Value[] values = valuesEntry.readScaled(1);
                             if (values.length > 0)
                             {
                                 value = values[0];
-                                this.currentValues.put(valuesEntry, value);
+                                this.queuedValues.put(valuesEntry, value);
                             }
                             else
                             {
@@ -278,7 +394,7 @@ public class Unisens2Excel
                             {
                                 for (int j = 0; j < valuesEntry.getChannelCount(); j++)
                                 {
-                                    cell = row.createCell(cellnum);
+                                    cell = resultSheetRow.createCell(cellnum);
                                     cellnum++;
                                     cell.setCellValue(((double[]) value.getData())[j]);
                                 }
@@ -303,7 +419,7 @@ public class Unisens2Excel
                 
                 if (nEntriesWithData==0)
                 {
-                	resultSheet.removeRow(row);
+                	resultSheet.removeRow(resultSheetRow);
                 	break;
                 }
 
@@ -328,6 +444,38 @@ public class Unisens2Excel
             wb.dispose();
         }
         this.unisens.closeAll();
+    }
+    
+    
+    void addColumnHeaderRow(Row row, int columnCount, String header)
+    {
+    	//result sheet
+        Cell cell = row.createCell(columnCount);
+        cell.setCellValue(header);
+        cell.setCellStyle(headline);
+        resultSheet.setColumnWidth(columnCount, 7000);
+        columnCount++;
+    }
+    
+    void addParameter(int rowCount, String name, String unit, String comment)
+    {
+        Row pRow = parameterSheet.createRow(rowCount);
+        Cell cell = pRow.createCell(0);
+        cell.setCellValue(name);
+        cell = pRow.createCell(1);
+        cell.setCellValue(unit);
+        cell = pRow.createCell(2);
+        cell.setCellValue(comment);
+        rowCount++;
+    }
+    
+    String markerList2String(List<Marker> markerList)
+    {
+    	String str="";
+    	for (Marker marker : markerList) {
+            str = str + marker.toString();
+        }
+		return str;
     }
 
     /**
