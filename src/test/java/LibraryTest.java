@@ -35,7 +35,7 @@ public class LibraryTest {
     @Test public void testXlsRendering3B() throws UnisensParseException, IOException {
  	   
    		Unisens2Excel u2xls= new Unisens2Excel("./src/test/resources/UnisensTestData/T3", 1.0/10, "./Results3B.xlsx");
-   		u2xls.setMarkerFormat(MarkerFormat.SIMPLE);
+   		u2xls.setMarkerFormat(MarkerFormat.JSON);
   		u2xls.renderXLS();
     }
     

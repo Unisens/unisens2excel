@@ -69,7 +69,7 @@ public class Unisens2Excel
     final static String[] DATE_TIME_UNITS = { "[s]", "[d]", "[hh:mm:ss]", "[yyyy-mm-dd]", "[hh:mm:ss]"};
     final static String[] DATE_TIME_DESCRIPTIONS = { "Relative time from start of measurements in seconds", "Number of days from start of measurement", "Relative time from start if measurement", "Absolute date", "Absolute time"};
 
-    MarkerFormat markerFormat = MarkerFormat.JSON;
+    MarkerFormat markerFormat = MarkerFormat.SIMPLE;
     
     CellStyle headline;
     Sheet resultSheet;
