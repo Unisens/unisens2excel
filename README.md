@@ -12,7 +12,7 @@ Add the JitPack repository and the dependency to your build file:
       maven { url "https://jitpack.io" }
   }
   dependencies {
-      compile 'com.github.unisens:unisens2excel:1.0.4'
+      compile 'com.github.unisens:unisens2excel:1.0.5'
   }
   ```
 
