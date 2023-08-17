@@ -54,3 +54,11 @@ task copyToLib(type: Copy) {
     into "$buildDir/output/lib"
     from configurations.runtime
 }
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
+}
