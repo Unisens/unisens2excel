@@ -10,6 +10,7 @@
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
 targetCompatibility = "1.7"
 sourceCompatibility = "1.7"
@@ -23,7 +24,7 @@ repositories {
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
-	maven { url "https://jitpack.io" }
+    maven { url "https://jitpack.io" }
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -42,12 +43,12 @@ dependencies {
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier 'sources'
-	from sourceSets.main.allSource
+    classifier 'sources'
+    from sourceSets.main.allSource
 }
- 
+
 artifacts {
-	archives sourcesJar
+    archives sourcesJar
 }
 
 task copyToLib(type: Copy) {
@@ -57,8 +58,8 @@ task copyToLib(type: Copy) {
 
 publishing {
     publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
+        maven(MavenPublication) {
+            from components.java
         }
     }
 }
